@@ -70,14 +70,6 @@ def create(density=0.30, big=False):  #density=0.4
     return x
 
   def segment_block(x, segments, factor, name):
-    """
-    Rethinking this again.
-    I like the statistical average of output being variance=1, mean 0, sort of...
-
-    Ideally, it would be best if we could compute variance with a fixed mean of 0.
-    Actually ^ it's maybe better to keep the mean above 0 so we can some real negative
-    values that go into the Activator layer.
-    """
     x = Sparse(segments * factor, density,
                use_bias=False,
                #activity_regularizer=segment_activity_regularizer,
@@ -88,24 +80,6 @@ def create(density=0.30, big=False):  #density=0.4
 
     return SegmentPooling(factor)(x)
 
-  """
-  Using Batch norm is odd because it changes what zero means.
-  
-  Maybe, inhibition layer should just shift all output so only 1sd+ is positive, scale by variance, then apply clampz!
-  That would replace normalization, inhibition, and activation. ^^^^^
-  Would also guarantee a solid SDR each time.
-  
-  ORR still do shift, then LRI, then scale.
-  
-  I think negative values should never be a big thing- weights, maybe, a bit.
-  
-  x = lri(x)
-  sd = sd(x)
-  var = var(x)
-  x = x - sd
-  x = x / var
-  x = clampz(x)
-  """
   def single_dim_bn(x, name):
     orig_shape = x.shape[1:]
     x = Reshape(orig_shape + (1,))(x)
